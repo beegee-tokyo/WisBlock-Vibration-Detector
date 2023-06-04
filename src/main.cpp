@@ -249,7 +249,7 @@ void lora_data_handler(void)
 
 		if ((g_lorawan_settings.confirmed_msg_enabled) && (g_lorawan_settings.lorawan_enable))
 		{
-			AT_PRINTF("+EVT:SEND CONFIRMED %s\n", g_rx_fin_result ? "SUCCESS" : "FAIL");
+			AT_PRINTF("+EVT:SEND CONFIRMED %s\n", g_rx_fin_result ? "OK" : "ERROR");
 		}
 		else
 		{

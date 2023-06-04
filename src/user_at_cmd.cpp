@@ -40,7 +40,7 @@ Preferences esp32_prefs;
  */
 static int at_set_tout(char *str)
 {
-	long new_tout = strtol(str, NULL, 0);
+	uint32_t new_tout = strtoul(str, NULL, 0);
 
 	if (new_tout > g_lorawan_settings.send_repeat_time)
 	{
@@ -117,10 +117,20 @@ void read_settings(void)
 void save_settings(uint32_t tout)
 {
 #ifdef NRF52_SERIES
+	// Remove old setting
+	InternalFS.remove(tout_name);
+
+	// Write new setting
 	tout_check.open(tout_name, FILE_O_WRITE);
+	if (!tout_check)
+	{
+		MYLOG("USR_AT", "Error opening file");
+
+	}
 	tout_check.write((uint8_t const *)&g_tout, 4);
+	tout_check.flush();
 	tout_check.close();
-	MYLOG("USR_AT", "Saved vibration timeout");
+	MYLOG("USR_AT", "Saved vibration timeout %ld", g_tout);
 #endif
 #ifdef ESP32
 	esp32_prefs.begin("tout", false);
