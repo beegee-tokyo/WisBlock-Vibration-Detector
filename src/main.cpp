@@ -113,6 +113,7 @@ void app_event_handler(void)
 			motion_end_timeout.start();
 			send_packet = true;
 			MYLOG("APP", "Motion start");
+			api_timer_restart(g_lorawan_settings.send_repeat_time);
 		}
 		else
 		{
@@ -168,12 +169,10 @@ void app_event_handler(void)
 		else
 		{
 			// Add unique identifier in front of the P2P packet, here we use the DevEUI
-			uint8_t p2p_buffer[g_solution_data.getSize() + 8];
-			memcpy(p2p_buffer, g_lorawan_settings.node_device_eui, 8);
-			// Add the packet data
-			memcpy(&p2p_buffer[8], g_solution_data.getBuffer(), g_solution_data.getSize());
+			g_solution_data.addDevID(0x00, &g_lorawan_settings.node_device_eui[4]);
+
 			// Send packet over LoRa
-			if (send_p2p_packet(p2p_buffer, g_solution_data.getSize() + 8))
+			if (send_p2p_packet(g_solution_data.getBuffer(), g_solution_data.getSize()))
 			{
 				MYLOG("APP", "Packet enqueued");
 			}

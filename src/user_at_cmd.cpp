@@ -35,7 +35,7 @@ Preferences esp32_prefs;
 /**
  * @brief Set vibration timeout
  *
- * @param str selected timeout as String in seconds
+ * @param str selected timeout as String in milliseconds
  * @return int AT_SUCCESS if ok, AT_ERRNO_PARA_FAIL if invalid value
  */
 static int at_set_tout(char *str)

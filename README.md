@@ -17,7 +17,7 @@ The application offers at the moment to setup two parameters via AT commands:
 
 **`ATC+SENDINT=xxxxx`** => Allows to setup the heartbeat (I am alive) sending interval in xxxxx seconds.
 
-**`ATC+TOUT=xxxx`** => Allows to setup the timeout for "off" status in seconds. For the washing machine example, I set this to 30 seconds before the application reports "inactivity".
+**`ATC+TOUT=xxxx`** => Allows to setup the timeout for "off" status in milliseconds. For the washing machine example, I set this to 30 seconds before the application reports "inactivity".
 
 ### ⚠️ TODO:
 Add setup for the sensitivity of the vibration. At the moment this is fixed to 1/8th of the range of 2G. This makes it very sensitive.

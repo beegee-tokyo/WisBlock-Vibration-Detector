@@ -120,7 +120,7 @@ bool init_rak1904(void)
 	Wire.begin();
 	usedWire = &Wire;
 
-	acc_sensor.setDataRate(LIS3DH_DATARATE_LOWPOWER_1K6HZ);
+	acc_sensor.setDataRate(LIS3DH_DATARATE_1_HZ); // LIS3DH_DATARATE_LOWPOWER_1K6HZ
 	acc_sensor.setRange(LIS3DH_RANGE_2_G);
 
 	if (!acc_sensor.begin())
