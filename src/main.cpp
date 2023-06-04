@@ -76,7 +76,7 @@ bool init_app(void)
 	// Reset the packet
 	g_solution_data.reset();
 
-	digitalWrite(WB_IO2, HIGH);
+	digitalWrite(WB_IO2, LOW);
 
 	return true;
 }
