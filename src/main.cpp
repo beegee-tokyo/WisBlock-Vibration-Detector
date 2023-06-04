@@ -4,7 +4,7 @@
 bool battery_check_enabled = false;
 
 /** Set the device name, max length is 10 characters */
-char g_ble_dev_name[10] = "RAK-SENS";
+char g_ble_dev_name[10] = "RAK-VIB";
 
 /** Send Fail counter **/
 uint8_t join_send_fail = 0;
@@ -49,9 +49,9 @@ void setup_app(void)
 
 	// Initialize user AT commands
 	init_user_at();
-	
+
 	// BLE off
-	g_enable_ble = false;
+	g_enable_ble = true;
 }
 
 /**
@@ -89,6 +89,7 @@ bool init_app(void)
 void app_event_handler(void)
 {
 	bool send_packet = false;
+	bool clear_int = false;
 
 	// Timer triggered event
 	if ((g_task_event_type & STATUS) == STATUS)
@@ -98,12 +99,20 @@ void app_event_handler(void)
 		send_packet = true;
 	}
 
+	// Clear interrupt register event
+	if ((g_task_event_type & CLEAR_INT) == CLEAR_INT)
+	{
+		g_task_event_type &= N_CLEAR_INT;
+		MYLOG("APP", "Clear interrupts");
+		clear_int_rak1904();
+	}
+
 	// Motion triggered event
 	if ((g_task_event_type & MOTION) == MOTION)
 	{
 		g_task_event_type &= N_MOTION;
-		MYLOG("APP", "Motion wakeup");
-		clear_int_rak1904();
+
+		clear_int = true;
 
 		if (!motion_detected)
 		{
@@ -127,7 +136,8 @@ void app_event_handler(void)
 	if ((g_task_event_type & MOTION_END) == MOTION_END)
 	{
 		g_task_event_type &= N_MOTION_END;
-		clear_int_rak1904();
+
+		clear_int = true;
 
 		motion_detected = false;
 		digitalWrite(LED_BLUE, LOW);
@@ -189,6 +199,13 @@ void app_event_handler(void)
 	// }
 	// Reset the packet
 	g_solution_data.reset();
+
+	if (clear_int)
+	{
+		// Start timer for delayed clearing of interrupt flags.
+		MYLOG("APP", "Start timer for delayed clearing");
+		delayed_clear_int_rak1904();
+	}
 }
 
 /**

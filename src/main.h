@@ -4,9 +4,9 @@
  * @brief Includes, defines and globals
  * @version 0.1
  * @date 2023-05-01
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 #include <Arduino.h>
 #include <Wisblock-API-V2.h>
@@ -18,24 +18,36 @@
 #endif
 
 #if MY_DEBUG > 0
-#define MYLOG(tag, ...)                  \
-	do                                   \
-	{                                    \
-		if (tag)                         \
-			Serial.printf("[%s] ", tag); \
-		Serial.printf(__VA_ARGS__);      \
-		Serial.printf("\n");             \
-	} while (0);                         \
-	delay(100)
+#define MYLOG(tag, ...)                                  \
+	do                                                   \
+	{                                                    \
+		if (tag)                                         \
+			Serial.printf("[%s] ", tag);                 \
+		Serial.printf(__VA_ARGS__);                      \
+		Serial.printf("\n");                             \
+	} while (0);                                         \
+	if (g_ble_uart_is_connected)                         \
+	{                                                    \
+		char ble_string[256];                            \
+		int tag_len = 0;                                 \
+		if (tag)                                         \
+			tag_len = sprintf(ble_string, "[%s] ", tag); \
+		sprintf(&ble_string[tag_len], __VA_ARGS__);      \
+		g_ble_uart.printf("%s", ble_string);             \
+		g_ble_uart.flush();                              \
+	}                                                    \
+	delay(100);
 #else
 #define MYLOG(...)
 #endif
 
 /** Wakeup triggers for application events */
-#define MOTION       0b1000000000000000
-#define N_MOTION     0b0111111111111111
-#define MOTION_END   0b0100000000000000
+#define MOTION 0b1000000000000000
+#define N_MOTION 0b0111111111111111
+#define MOTION_END 0b0100000000000000
 #define N_MOTION_END 0b1011111111111111
+#define CLEAR_INT 0b0010000000000000
+#define N_CLEAR_INT 0b1101111111111111
 
 // Cayenne LPP channel numbers
 #define LPP_CHANNEL_BATT 1 // Base Board
@@ -44,6 +56,7 @@
 // Forward declarations
 bool init_rak1904(void);
 void clear_int_rak1904(void);
+void delayed_clear_int_rak1904(void);
 extern SoftwareTimer motion_end_timeout;
 
 // User AT commands

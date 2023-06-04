@@ -33,6 +33,9 @@ Adafruit_LIS3DH acc_sensor(&Wire);
 /** Software Timer for detecting off status */
 SoftwareTimer motion_end_timeout;
 
+/** Software Timer to debounce trigger during permanent movement */
+SoftwareTimer delayed_clear;
+
 /** For internal usage */
 TwoWire *usedWire;
 
@@ -49,6 +52,16 @@ uint32_t g_tout = 10000;
 void machine_timeout(TimerHandle_t unused)
 {
 	api_wake_loop(MOTION_END);
+}
+
+/**
+ * @brief Timer callback to clear interrupt flags
+ * 
+ * @param unused 
+ */
+void delayed_int_clear(TimerHandle_t unused)
+{
+	api_wake_loop(CLEAR_INT);
 }
 
 /**
@@ -190,6 +203,9 @@ bool init_rak1904(void)
 	// Prepare timer for vibration timeout
 	motion_end_timeout.begin(g_tout, machine_timeout, NULL, false);
 
+	// Prepare timer for delayed interrupt clearing
+	delayed_clear.begin(g_tout / 10, delayed_int_clear, NULL, false);
+
 	return true;
 }
 
@@ -201,7 +217,6 @@ bool init_rak1904(void)
 void int_callback_rak1904(void)
 {
 	api_wake_loop(MOTION);
-	// clear_int_rak1904();
 }
 
 /**
@@ -211,4 +226,15 @@ void int_callback_rak1904(void)
 void clear_int_rak1904(void)
 {
 	acc_sensor.readAndClearInterrupt();
+}
+
+/**
+ * @brief Start timer to clear interrupts in 1/10 of vibration timeout
+ * 
+ */
+void delayed_clear_int_rak1904(void)
+{
+	// Clear interrupts in 1/10th of motion timeout
+	delayed_clear.start();
+	MYLOG("ACC", "Started clear timer with %ld ms", g_tout / 10);
 }
